@@ -1,0 +1,31 @@
+x-no-cluster: &no-cluster
+  build: .
+  image: mpi-cluster
+  shm_size: 256m
+  networks:
+    - mpinet
+
+services:
+  master:
+    <<: *no-cluster
+    container_name: master
+    hostname: master
+
+  worker1:
+    <<: *no-cluster
+    container_name: worker1
+    hostname: worker1
+
+  worker2:
+    <<: *no-cluster
+    container_name: worker2
+    hostname: worker2
+
+  worker3:
+    <<: *no-cluster
+    container_name: worker3
+    hostname: worker3
+
+networks:
+  mpinet:
+    driver: bridge
