@@ -1,0 +1,68 @@
+{
+  "parametros": {
+    "linhas": 6000,
+    "colunas": 6000,
+    "limiar_suspeito": 200,
+    "limiar_alto": 230,
+    "percentual_critico": 5.0,
+    "taxa_anomalia": 4.0,
+    "seed": 2026,
+    "fator_atraso": 0.5
+  },
+  "processos": 2,
+  "metricas_globais": {
+    "pixels": 36000000,
+    "soma_intensidades": 3170101354,
+    "media_intensidades": 88.05837094444445,
+    "maximo": 255,
+    "suspeitos": 529120,
+    "altamente_suspeitos": 245676,
+    "percentual_suspeito": 1.4697777777777778,
+    "percentual_alto": 0.6824333333333333,
+    "suspeitos_esquerda": 264640,
+    "suspeitos_direita": 264480,
+    "lado_critico": "ESQUERDO",
+    "classificacao": "ATENCAO",
+    "tempo_total_ms": 8296.302451000001
+  },
+  "relatorios_por_rank": [
+    {
+      "rank": 0,
+      "linha_inicio": 0,
+      "linha_fim": 2999,
+      "linhas": 3000,
+      "dimensao": [
+        3000,
+        6000
+      ],
+      "pixels": 18000000,
+      "media": 83.31725505555555,
+      "maximo": 255,
+      "suspeitos": 273415,
+      "altamente_suspeitos": 127195,
+      "percentual_suspeito": 1.5189722222222222,
+      "classificacao": "ATENCAO",
+      "atraso_s": 0.0,
+      "tempo_local_ms": 62.82640199999978
+    },
+    {
+      "rank": 1,
+      "linha_inicio": 3000,
+      "linha_fim": 5999,
+      "linhas": 3000,
+      "dimensao": [
+        3000,
+        6000
+      ],
+      "pixels": 18000000,
+      "media": 92.79948683333333,
+      "maximo": 255,
+      "suspeitos": 255705,
+      "altamente_suspeitos": 118481,
+      "percentual_suspeito": 1.4205833333333333,
+      "classificacao": "ATENCAO",
+      "atraso_s": 0.5,
+      "tempo_local_ms": 557.1214790000009
+    }
+  ]
+}

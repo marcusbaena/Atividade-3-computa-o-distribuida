@@ -1,0 +1,49 @@
+{
+  "parametros": {
+    "linhas": 2000,
+    "colunas": 2000,
+    "limiar_suspeito": 200,
+    "limiar_alto": 230,
+    "percentual_critico": 5.0,
+    "taxa_anomalia": 4.0,
+    "seed": 2026,
+    "fator_atraso": 0.5
+  },
+  "processos": 1,
+  "metricas_globais": {
+    "pixels": 4000000,
+    "soma_intensidades": 352195543,
+    "media_intensidades": 88.04888575,
+    "maximo": 255,
+    "suspeitos": 58754,
+    "altamente_suspeitos": 27118,
+    "percentual_suspeito": 1.46885,
+    "percentual_alto": 0.67795,
+    "suspeitos_esquerda": 29472,
+    "suspeitos_direita": 29282,
+    "lado_critico": "ESQUERDO",
+    "classificacao": "ATENCAO",
+    "tempo_total_ms": 305.172189
+  },
+  "relatorios_por_rank": [
+    {
+      "rank": 0,
+      "linha_inicio": 0,
+      "linha_fim": 1999,
+      "linhas": 2000,
+      "dimensao": [
+        2000,
+        2000
+      ],
+      "pixels": 4000000,
+      "media": 88.04888575,
+      "maximo": 255,
+      "suspeitos": 58754,
+      "altamente_suspeitos": 27118,
+      "percentual_suspeito": 1.46885,
+      "classificacao": "ATENCAO",
+      "atraso_s": 0.0,
+      "tempo_local_ms": 4.291138000000028
+    }
+  ]
+}

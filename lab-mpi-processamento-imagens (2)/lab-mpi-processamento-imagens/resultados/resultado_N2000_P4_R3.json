@@ -1,0 +1,106 @@
+{
+  "parametros": {
+    "linhas": 2000,
+    "colunas": 2000,
+    "limiar_suspeito": 200,
+    "limiar_alto": 230,
+    "percentual_critico": 5.0,
+    "taxa_anomalia": 4.0,
+    "seed": 2026,
+    "fator_atraso": 0.5
+  },
+  "processos": 4,
+  "metricas_globais": {
+    "pixels": 4000000,
+    "soma_intensidades": 352195543,
+    "media_intensidades": 88.04888575,
+    "maximo": 255,
+    "suspeitos": 58754,
+    "altamente_suspeitos": 27118,
+    "percentual_suspeito": 1.46885,
+    "percentual_alto": 0.67795,
+    "suspeitos_esquerda": 29472,
+    "suspeitos_direita": 29282,
+    "lado_critico": "ESQUERDO",
+    "classificacao": "ATENCAO",
+    "tempo_total_ms": 2287.915421
+  },
+  "relatorios_por_rank": [
+    {
+      "rank": 0,
+      "linha_inicio": 0,
+      "linha_fim": 499,
+      "linhas": 500,
+      "dimensao": [
+        500,
+        2000
+      ],
+      "pixels": 1000000,
+      "media": 71.322904,
+      "maximo": 255,
+      "suspeitos": 7695,
+      "altamente_suspeitos": 3633,
+      "percentual_suspeito": 0.7695,
+      "classificacao": "NORMAL",
+      "atraso_s": 0.0,
+      "tempo_local_ms": 1.878594999999983
+    },
+    {
+      "rank": 1,
+      "linha_inicio": 500,
+      "linha_fim": 999,
+      "linhas": 500,
+      "dimensao": [
+        500,
+        2000
+      ],
+      "pixels": 1000000,
+      "media": 95.290754,
+      "maximo": 255,
+      "suspeitos": 22534,
+      "altamente_suspeitos": 10296,
+      "percentual_suspeito": 2.2534,
+      "classificacao": "ATENCAO",
+      "atraso_s": 0.5,
+      "tempo_local_ms": 502.44806
+    },
+    {
+      "rank": 2,
+      "linha_inicio": 1000,
+      "linha_fim": 1499,
+      "linhas": 500,
+      "dimensao": [
+        500,
+        2000
+      ],
+      "pixels": 1000000,
+      "media": 98.031356,
+      "maximo": 255,
+      "suspeitos": 21998,
+      "altamente_suspeitos": 10194,
+      "percentual_suspeito": 2.1998,
+      "classificacao": "ATENCAO",
+      "atraso_s": 0.0,
+      "tempo_local_ms": 3.0870189999999686
+    },
+    {
+      "rank": 3,
+      "linha_inicio": 1500,
+      "linha_fim": 1999,
+      "linhas": 500,
+      "dimensao": [
+        500,
+        2000
+      ],
+      "pixels": 1000000,
+      "media": 87.550529,
+      "maximo": 255,
+      "suspeitos": 6527,
+      "altamente_suspeitos": 2995,
+      "percentual_suspeito": 0.6527,
+      "classificacao": "NORMAL",
+      "atraso_s": 1.5,
+      "tempo_local_ms": 1503.073517
+    }
+  ]
+}

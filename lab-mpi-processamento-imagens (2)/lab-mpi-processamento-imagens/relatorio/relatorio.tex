@@ -1,0 +1,343 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{enumitem}
+
+\geometry{margin=2.5cm}
+\hypersetup{colorlinks=true,linkcolor=blue!45!black,urlcolor=blue!55!black}
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0.25em}
+\renewcommand{\arraystretch}{1.2}
+
+% Preencha apenas os dados de identificação ainda ausentes.
+\newcommand{\NomeAluno}{Luiz Alberto Silva Mota}
+\newcommand{\RAAluno}{PREENCHER RA}
+\newcommand{\CursoAluno}{PREENCHER CURSO}
+\newcommand{\DataEntrega}{22 de setembro de 2026}
+
+\newcommand{\figuraouespaco}[3]{%
+  \begin{figure}[H]
+    \centering
+    \IfFileExists{#1}{\includegraphics[width=#2\textwidth]{#1}}{%
+      \fbox{\parbox[c][5.2cm][c]{0.88\textwidth}{\centering
+      Espaço reservado para #3\\[0.5em]\texttt{#1}}}}
+    \caption{#3}
+  \end{figure}}
+
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue!60!black},
+  commentstyle=\color{green!40!black},
+  stringstyle=\color{orange!60!black},
+  frame=single,
+  breaklines=true,
+  showstringspaces=false
+}
+
+\begin{document}
+
+\begin{titlepage}
+  \centering
+  {\large Universidade Presbiteriana Mackenzie\par}
+  \vspace{1.4cm}
+  {\large \CursoAluno\par}
+  {\large Disciplina: Computação Distribuída\par}
+  \vfill
+  {\LARGE\bfseries Processamento Distribuído de Imagens Médicas com MPI\par}
+  \vspace{0.8cm}
+  {\large Relatório do Laboratório 04\par}
+  \vfill
+  \begin{tabular}{rl}
+    Aluno: & \NomeAluno \\
+    RA: & \RAAluno \\
+    Docentes: & Prof. Alcides / Prof. Mário \\
+  \end{tabular}
+  \vfill
+  São Paulo\\
+  \DataEntrega
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Introdução e fundamentos teóricos}
+
+Radiografias digitais em tons de cinza podem ser representadas por matrizes
+bidimensionais, nas quais cada elemento contém a intensidade de um pixel no
+intervalo de 0 a 255. Em uma triagem computacional simplificada, intensidades
+elevadas no interior dos campos pulmonares são tratadas como possíveis regiões
+de consolidação. O objetivo deste trabalho é detectar e localizar essas
+alterações em uma radiografia sintética, reduzindo o tempo de processamento por
+paralelismo de dados.
+
+O padrão MPI organiza processos independentes em um comunicador. Cada processo
+possui um identificador (\emph{rank}) e o processo de rank zero atua como
+coordenador. A imagem é dividida em faixas horizontais contíguas e cada rank
+analisa somente sua faixa. A solução utiliza cinco operações centrais:
+\texttt{Bcast} difunde parâmetros; \texttt{Scatter} distribui as faixas;
+\texttt{Barrier} delimita fases; \texttt{Reduce} agrega métricas numéricas; e
+\texttt{Gather} coleta relatórios descritivos individuais.
+
+O modelo é SPMD (\emph{Single Program, Multiple Data}): todos executam o mesmo
+programa, mas operam sobre dados diferentes. A aceleração é limitada pelas
+partes seriais, pelo custo de comunicação e pelo rank mais lento, conforme a
+Lei de Amdahl e a semântica das sincronizações coletivas.
+
+\section{Metodologia e arquitetura do cluster}
+
+\subsection{Infraestrutura}
+
+O ambiente é reproduzido com Docker Compose e contém quatro contêineres: um
+\texttt{master} e três \texttt{workers}. Cada contêiner anuncia dois slots no
+arquivo \texttt{hosts}, totalizando oito processos. A imagem base é Python 3.12
+sobre Debian Bookworm, com Open MPI, OpenSSH, \texttt{mpi4py} 4.1.0, NumPy 2.2.6
+e Matplotlib 3.10.3. O mesmo diretório do projeto é montado em todos os nós, e o
+Open MPI inicia processos remotos por SSH sem senha em uma rede Docker isolada.
+
+\subsection{Geração da radiografia sintética}
+
+Somente o rank zero cria a matriz. O fundo e o mediastino recebem intensidades
+baixas/médias com gradiente crânio-caudal. Duas máscaras elípticas representam
+os campos pulmonares e recebem valores predominantemente normais. Uma fração
+configurável dos pixels pulmonares é então selecionada, sem reposição, para
+receber intensidades a partir do limiar suspeito. A semente pseudoaleatória
+fixa em 2026 garante que a imagem seja idêntica nas comparações entre números de
+processos.
+
+Os valores padrão são: limiar suspeito 200, limiar alto 230, percentual crítico
+5\% e taxa sintética de anomalia pulmonar 4\%. Uma faixa é classificada como
+\texttt{NORMAL} abaixo de 1\% de pixels suspeitos; \texttt{ATENCAO} entre 1\% e
+5\%; e \texttt{CRITICA} a partir de 5\%. Para tornar objetiva a expressão
+``presença expressiva de pixels altamente suspeitos'', também se considera
+crítica a faixa em que pixels acima de 230 atinjam metade do percentual crítico.
+
+\subsection{Fluxo distribuído}
+
+O rank zero empacota dimensões, limiares, semente e parâmetros de atraso em um
+dicionário e executa \texttt{comm.bcast}. Uma primeira barreira garante que
+todos concluíram a parametrização. A matriz é dividida por
+\texttt{numpy.array\_split}, que preserva todas as linhas mesmo quando a divisão
+não é exata, e os blocos são distribuídos por \texttt{comm.scatter}.
+
+Cada rank calcula quantidade e soma de pixels, máximo local, contagens suspeita
+e altamente suspeita e contagens por pulmão esquerdo e direito. Para simular
+heterogeneidade, ranks ímpares aguardam $0{,}5\times rank$ segundos após o
+processamento local; ranks pares não recebem atraso. A segunda barreira impede
+que a consolidação comece antes do rank mais lento.
+
+As somas e o máximo globais são obtidos com \texttt{comm.reduce}, usando
+\texttt{MPI.SUM} e \texttt{MPI.MAX}. Em paralelo, cada rank monta um dicionário
+com intervalo de linhas, dimensão, média, pico, classificação e tempo local;
+esses registros são enviados ao coordenador por \texttt{comm.gather}. Por fim,
+o rank zero calcula percentuais, lateralidade e diagnóstico geral, imprime o
+relatório e opcionalmente grava JSON.
+
+\section{Evidências experimentais}
+
+Os experimentos devem usar a mesma semente e parâmetros em todas as execuções.
+As capturas abaixo comprovam o funcionamento com as três quantidades de
+processos exigidas.
+
+\figuraouespaco{figuras/execucao_2_processos.png}{0.95}{Execução com 2 processos MPI}
+\figuraouespaco{figuras/execucao_4_processos.png}{0.95}{Execução com 4 processos MPI}
+\figuraouespaco{figuras/execucao_8_processos.png}{0.95}{Execução com 8 processos MPI}
+
+As três execuções produziram o mesmo resultado clínico para a imagem de
+$2000\times2000$: 58.754 pixels suspeitos (1,4688\%), 27.118 altamente
+suspeitos (0,6780\%), maior intensidade igual a 255 e classificação geral
+\texttt{ATENCAO}. O pulmão esquerdo apresentou 29.472 pixels suspeitos, contra
+29.282 no direito. A Figura 3 contém também o relatório consolidado completo e
+a auditoria dos oito ranks.
+
+\section{Desempenho e escalabilidade}
+
+Cada configuração foi executada três vezes. A Tabela 1 apresenta a média dos
+tempos totais registrados no campo \texttt{tempo\_total\_ms} dos JSONs. A linha
+de um processo é a referência para calcular o speedup clássico.
+
+\begin{table}[H]
+\centering
+\caption{Tempo médio de execução em milissegundos.}
+\begin{tabular}{ccccc}
+\toprule
+Dimensão & 1 processo & 2 processos & 4 processos & 8 processos \\
+\midrule
+$2000\times2000$ & $740{,}602$ & $819{,}135$ & $1.972{,}004$ & $4.111{,}979$ \\
+$4000\times4000$ & $3.691{,}355$ & $1.832{,}817$ & $3.004{,}286$ & $6.393{,}504$ \\
+$6000\times6000$ & $6.996{,}085$ & $2.659{,}646$ & $4.584{,}165$ & $8.230{,}646$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+O speedup e a eficiência são definidos por
+\begin{equation}
+S_p=\frac{T_1}{T_p}, \qquad E_p=\frac{S_p}{p}.
+\end{equation}
+O CSV registrou speedups de 0,904, 0,376 e 0,180 para a imagem
+$2000\times2000$ com 2, 4 e 8 processos. Para $4000\times4000$, os valores
+foram 2,014, 1,229 e 0,577; para $6000\times6000$, 2,630, 1,526 e 0,850.
+
+\figuraouespaco{figuras/speedup.png}{0.80}{Speedup por dimensão da imagem}
+
+A comparação deve considerar conjuntamente tempo, speedup e eficiência. Para
+$2000\times2000$, um processo apresentou a menor média. Para as matrizes
+$4000\times4000$ e $6000\times6000$, dois processos apresentaram as menores
+médias, respectivamente 1.832,817 ms e 2.659,646 ms. Quatro e oito processos
+foram prejudicados pelos atrasos dos ranks ímpares, especialmente pelo rank 7,
+que adiciona 3,5 s. A dispersão do baseline de um processo foi elevada:
+desvios-padrão de 659,979 ms, 4.095,725 ms e 7.751,170 ms. Por isso, os speedups
+superlineares de 2,014 e 2,630 devem ser tratados com cautela, pois refletem
+também instabilidade ou efeito de aquecimento nas execuções sequenciais.
+
+\section{Questões de análise e reflexão}
+
+\subsection*{1. Impacto do número de processos no tempo de execução}
+O tempo não precisa diminuir linearmente. A fração serial inclui geração da
+imagem, criação dos blocos, impressão e escrita do JSON. Somam-se a ela
+serialização, transferência, criação de processos e sincronização. Pela Lei de
+Amdahl, mesmo uma parte serial pequena limita o speedup máximo. Para a imagem
+$2000\times2000$, a média aumentou de 819,135 ms com dois processos para
+1.972,004 ms com quatro e 4.111,979 ms com oito. Isso representa aumentos de
+aproximadamente 140,7\% e 108,5\% nas duas transições, explicados principalmente
+pelo atraso artificial dos ranks ímpares e pelas barreiras globais.
+
+\subsection*{2. Influência dos processos lentos (stragglers)}
+Depois da análise local, ranks ímpares dormem por $0{,}5\times rank$ segundos.
+Como todos chegam à segunda barreira e às operações coletivas, o tempo global é
+ditado pelo participante mais lento. Com oito processos, o rank 7 acrescenta
+3,5 s; os demais permanecem ociosos na barreira. Isso ilustra que balancear a
+quantidade de dados não elimina heterogeneidade de hardware.
+
+\subsection*{3. Papel prático de \texttt{MPI\_Barrier}}
+A primeira barreira separa configuração e distribuição; a segunda separa
+análise local e consolidação. A segunda é especialmente útil no experimento,
+pois torna observável o impacto do straggler e impede avanço de fase. Sem ela,
+as próprias operações coletivas ainda imporiam dependências, mas a fronteira
+entre fases ficaria implícita e os tempos seriam mais difíceis de interpretar.
+
+\subsection*{4. \texttt{Bcast} versus \texttt{Scatter}}
+Os parâmetros são pequenos e todos os ranks precisam da mesma cópia, portanto
+\texttt{Bcast} é adequado. A imagem é grande e cada rank precisa apenas de uma
+faixa, portanto \texttt{Scatter} evita replicação. Enviar a imagem completa por
+\texttt{Bcast} multiplicaria tráfego e memória por processo e exigiria que cada
+rank descartasse dados desnecessários.
+
+\subsection*{5. Diferença prática entre \texttt{Reduce} e \texttt{Gather}}
+\texttt{Reduce} combina valores por uma operação associativa, sendo apropriado
+para soma, contagem e máximo sem preservar a origem de cada parcela.
+\texttt{Gather} mantém um registro por rank e permite auditoria das faixas,
+classificações e tempos. Ambos são necessários: o primeiro produz métricas
+globais eficientes; o segundo conserva a individualidade dos nós.
+
+\subsection*{6. Escalabilidade em imagens pequenas}
+Para $500\times500$, a carga útil por rank é pequena. Inicialização do MPI,
+SSH, serialização, cópia, barreiras e reduções podem custar mais do que a
+varredura NumPy. Assim, distribuir a análise tende a não trazer vantagem e pode
+até aumentar o tempo. A bateria registrada começa em $2000\times2000$ e já
+mostra essa tendência: oito processos demoraram 4.111,979 ms, contra 740,602 ms
+com um processo. Em $500\times500$, a relação entre overhead e trabalho útil é
+ainda menos favorável.
+
+\subsection*{7. Detecção de lateralidade anatômica}
+As colunas menores que $\lfloor N/2\rfloor$ representam o pulmão esquerdo e as
+demais representam o direito. Cada rank recebe faixas horizontais, mas conserva
+todas as colunas; portanto a coordenada horizontal permanece válida em todos os
+blocos. Essa geometria permite somar separadamente suspeitos dos dois lados e
+inferir qual está mais comprometido.
+
+\subsection*{8. Balanceamento de carga}
+\texttt{array\_split} distribui números de linhas iguais ou diferentes por no
+máximo uma unidade, logo a carga nominal é uniforme. Entretanto, a quantidade
+de suspeitos pode variar entre faixas apicais, médias e basais devido à posição
+aleatória das alterações; o atraso artificial também cria desequilíbrio de
+tempo. Na execução com oito processos, as contagens variaram de 45 pixels
+suspeitos no rank 7 a 11.918 no rank 3, uma diferença de 11.873 pixels. Os
+tempos locais variaram de 0,741 ms a 3.511,767 ms, uma diferença de
+3.511,026 ms determinada principalmente pelo atraso artificial.
+
+\subsection*{9. Desafio de divisibilidade de linhas}
+Para 2003 linhas e quatro processos, a divisão correta é 501, 501, 501 e 500
+linhas. \texttt{numpy.array\_split} aplica essa distribuição automaticamente,
+sem \emph{padding} e sem perda. O início da faixa é calculado por
+$rank\lfloor M/P\rfloor+\min(rank,M\bmod P)$, mantendo intervalos contíguos e
+sem sobreposição. O teste deve registrar exatamente
+$2003\times2003=4\,012\,009$ pixels analisados, confirmando a ausência de perda
+ou duplicação.
+
+\section{Dificuldades técnicas e soluções}
+
+A execução MPI em múltiplos contêineres exige resolução dos nomes dos serviços,
+servidor SSH ativo e autenticação sem senha. A imagem Docker gera uma chave para
+o usuário \texttt{mpiuser}, instala Open MPI em todos os nós e usa uma rede
+Compose comum. Outro ponto é a divisibilidade: uma divisão inteira simples
+perderia o resto, enquanto \texttt{array\_split} mantém todas as linhas. Por
+fim, valores NumPy foram convertidos em inteiros Python antes de reduções e do
+JSON, evitando incompatibilidades de serialização. A automação também verifica
+o código de saída de cada execução, preserva o terminal em arquivos de log e
+só então gera o resumo, evitando incorporar medições incompletas.
+
+\section{Declaração e análise do uso de IA}
+
+Foi utilizada a ferramenta OpenAI Codex/ChatGPT principalmente como apoio na
+organização e redação deste relatório e no esclarecimento das questões de
+análise e reflexão que apresentaram maior dificuldade. O suporte ajudou a
+estruturar as respostas, relacionar os resultados experimentais aos conceitos
+de comunicação coletiva, sincronização, balanceamento de carga, speedup e Lei
+de Amdahl, além de revisar a apresentação dos dados obtidos nos testes.
+
+Também houve apoio na revisão da solução técnica e do roteiro de execução. As
+sugestões foram verificadas a partir do código, dos arquivos JSON e CSV e das
+capturas do terminal. Foram conferidos o uso de \texttt{Bcast},
+\texttt{Scatter}, \texttt{Barrier}, \texttt{Reduce} e \texttt{Gather}, a
+divisão das linhas com \texttt{array\_split} e a coerência entre as métricas e
+os resultados apresentados. Dessa forma, as respostas não foram aceitas
+automaticamente: foram comparadas com a implementação e com as evidências
+experimentais antes de serem incorporadas ao relatório. O principal aprendizado
+foi compreender a relação entre os coletivos MPI, os custos de sincronização e
+o comportamento de desempenho observado.
+
+\section{Conclusão}
+
+A solução decompõe uma radiografia sintética em faixas horizontais, mantém a
+semântica anatômica das colunas e consolida um diagnóstico auditável. A
+implementação cobre comunicação, sincronização, redução e coleta, além de lidar
+com divisões não exatas e heterogeneidade. Os resultados mostram que aumentar
+processos só é vantajoso quando a carga útil compensa o overhead e quando nenhum
+straggler domina a fase coletiva. Um processo foi melhor em
+$2000\times2000$, enquanto dois processos foram melhores em $4000\times4000$ e
+$6000\times6000$. O resultado confirma que paralelismo adicional só compensa
+quando o trabalho útil supera comunicação, sincronização e heterogeneidade.
+
+\begin{thebibliography}{9}
+\bibitem{mpi}
+MPI Forum. \emph{MPI: A Message-Passing Interface Standard, Version 4.1}.
+Disponível em: \url{https://www.mpi-forum.org/docs/mpi-4.1/mpi41-report.pdf}.
+
+\bibitem{mpi4py}
+DALCÍN, Lisandro. \emph{MPI for Python Documentation}.
+Disponível em: \url{https://mpi4py.readthedocs.io/}.
+
+\bibitem{numpy}
+NUMPY DEVELOPERS. \emph{NumPy Reference: array\_split}.
+Disponível em: \url{https://numpy.org/doc/stable/reference/generated/numpy.array_split.html}.
+
+\bibitem{docker}
+DOCKER. \emph{Docker Compose Documentation}.
+Disponível em: \url{https://docs.docker.com/compose/}.
+\end{thebibliography}
+
+\end{document}

@@ -1,0 +1,27 @@
+x-mpi-node: &mpi-node
+  image: lab-mpi-processamento-imagens:latest
+  build:
+    context: .
+  volumes:
+    - .:/home/mpiuser/lab
+  networks:
+    - mpi-net
+  restart: unless-stopped
+
+services:
+  master:
+    <<: *mpi-node
+    hostname: master
+  worker1:
+    <<: *mpi-node
+    hostname: worker1
+  worker2:
+    <<: *mpi-node
+    hostname: worker2
+  worker3:
+    <<: *mpi-node
+    hostname: worker3
+
+networks:
+  mpi-net:
+    driver: bridge

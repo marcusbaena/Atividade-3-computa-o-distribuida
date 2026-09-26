@@ -1,0 +1,182 @@
+{
+  "parametros": {
+    "linhas": 4000,
+    "colunas": 4000,
+    "limiar_suspeito": 200,
+    "limiar_alto": 230,
+    "percentual_critico": 5.0,
+    "taxa_anomalia": 4.0,
+    "seed": 2026,
+    "fator_atraso": 0.5
+  },
+  "processos": 8,
+  "metricas_globais": {
+    "pixels": 16000000,
+    "soma_intensidades": 1408941301,
+    "media_intensidades": 88.0588313125,
+    "maximo": 255,
+    "suspeitos": 235126,
+    "altamente_suspeitos": 109055,
+    "percentual_suspeito": 1.4695375,
+    "percentual_alto": 0.68159375,
+    "suspeitos_esquerda": 117548,
+    "suspeitos_direita": 117578,
+    "lado_critico": "DIREITO",
+    "classificacao": "ATENCAO",
+    "tempo_total_ms": 7694.335268
+  },
+  "relatorios_por_rank": [
+    {
+      "rank": 0,
+      "linha_inicio": 0,
+      "linha_fim": 499,
+      "linhas": 500,
+      "dimensao": [
+        500,
+        4000
+      ],
+      "pixels": 2000000,
+      "media": 60.3558045,
+      "maximo": 255,
+      "suspeitos": 2305,
+      "altamente_suspeitos": 1039,
+      "percentual_suspeito": 0.11525,
+      "classificacao": "NORMAL",
+      "atraso_s": 0.0,
+      "tempo_local_ms": 2.652356999999661
+    },
+    {
+      "rank": 1,
+      "linha_inicio": 500,
+      "linha_fim": 999,
+      "linhas": 500,
+      "dimensao": [
+        500,
+        4000
+      ],
+      "pixels": 2000000,
+      "media": 82.3354965,
+      "maximo": 255,
+      "suspeitos": 29415,
+      "altamente_suspeitos": 13707,
+      "percentual_suspeito": 1.47075,
+      "classificacao": "ATENCAO",
+      "atraso_s": 0.5,
+      "tempo_local_ms": 513.5683179999999
+    },
+    {
+      "rank": 2,
+      "linha_inicio": 1000,
+      "linha_fim": 1499,
+      "linhas": 500,
+      "dimensao": [
+        500,
+        4000
+      ],
+      "pixels": 2000000,
+      "media": 92.9964615,
+      "maximo": 255,
+      "suspeitos": 42497,
+      "altamente_suspeitos": 19816,
+      "percentual_suspeito": 2.12485,
+      "classificacao": "ATENCAO",
+      "atraso_s": 0.0,
+      "tempo_local_ms": 5.295224000000154
+    },
+    {
+      "rank": 3,
+      "linha_inicio": 1500,
+      "linha_fim": 1999,
+      "linhas": 500,
+      "dimensao": [
+        500,
+        4000
+      ],
+      "pixels": 2000000,
+      "media": 97.592603,
+      "maximo": 255,
+      "suspeitos": 47389,
+      "altamente_suspeitos": 21928,
+      "percentual_suspeito": 2.36945,
+      "classificacao": "ATENCAO",
+      "atraso_s": 1.5,
+      "tempo_local_ms": 1506.175421
+    },
+    {
+      "rank": 4,
+      "linha_inicio": 2000,
+      "linha_fim": 2499,
+      "linhas": 500,
+      "dimensao": [
+        500,
+        4000
+      ],
+      "pixels": 2000000,
+      "media": 98.7889485,
+      "maximo": 255,
+      "suspeitos": 46792,
+      "altamente_suspeitos": 21683,
+      "percentual_suspeito": 2.3396,
+      "classificacao": "ATENCAO",
+      "atraso_s": 0.0,
+      "tempo_local_ms": 7.387966000000024
+    },
+    {
+      "rank": 5,
+      "linha_inicio": 2500,
+      "linha_fim": 2999,
+      "linhas": 500,
+      "dimensao": [
+        500,
+        4000
+      ],
+      "pixels": 2000000,
+      "media": 97.2571095,
+      "maximo": 255,
+      "suspeitos": 41017,
+      "altamente_suspeitos": 18991,
+      "percentual_suspeito": 2.05085,
+      "classificacao": "ATENCAO",
+      "atraso_s": 2.5,
+      "tempo_local_ms": 2508.161929
+    },
+    {
+      "rank": 6,
+      "linha_inicio": 3000,
+      "linha_fim": 3499,
+      "linhas": 500,
+      "dimensao": [
+        500,
+        4000
+      ],
+      "pixels": 2000000,
+      "media": 91.7798915,
+      "maximo": 255,
+      "suspeitos": 25508,
+      "altamente_suspeitos": 11797,
+      "percentual_suspeito": 1.2754,
+      "classificacao": "ATENCAO",
+      "atraso_s": 0.0,
+      "tempo_local_ms": 7.099487000000071
+    },
+    {
+      "rank": 7,
+      "linha_inicio": 3500,
+      "linha_fim": 3999,
+      "linhas": 500,
+      "dimensao": [
+        500,
+        4000
+      ],
+      "pixels": 2000000,
+      "media": 83.3643355,
+      "maximo": 255,
+      "suspeitos": 203,
+      "altamente_suspeitos": 94,
+      "percentual_suspeito": 0.01015,
+      "classificacao": "NORMAL",
+      "atraso_s": 3.5,
+      "tempo_local_ms": 3597.247183
+    }
+  ]
+}
